@@ -48,8 +48,8 @@ int main(int argc, char **argv)
 	std::cout << time_str << std::endl;
 
 
-	ros::param::get("/tcp_imu_node/tc_ip", tc_ip); //获取串口名称
-	ros::param::get("/tcp_imu_node/tc_port", tc_port);  //获取串口波特率
+	ros::param::get("/tcp_imu_node/tc_ip", tc_ip); //获取ip地址
+	ros::param::get("/tcp_imu_node/tc_port", tc_port);  //获取端口
 	IMU_pub = n.advertise<sensor_msgs::Imu>("/imu", 20);
 
 	std::cout<<"tc_ip: "<<tc_ip<<" "<<"tc_port: "<<tc_port<<std::endl;
