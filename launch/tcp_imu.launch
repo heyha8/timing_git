@@ -1,0 +1,11 @@
+<launch>
+    <!-- serial/tcp_client -->
+    <arg name="tc_ip" default="192.168.1.100" />
+    <arg name="tc_port" default="3333" />
+
+    <node name="tcp_imu_node" pkg = "tcp_imu" type = "tcp_imu" output="screen" respawn="false">
+        <param name="tc_ip" value="$(arg tc_ip)" />
+        <param name="tc_port" value="$(arg tc_port)" />
+    </node>
+
+</launch>
