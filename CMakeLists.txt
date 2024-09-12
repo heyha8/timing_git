@@ -172,6 +172,11 @@ target_link_libraries(tcp_imu ${catkin_LIBRARIES})
 add_dependencies(tcp_imu ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(tcp_imu ${PROJECT_NAME}_generate_messages_cpp)
 
+add_executable(tcp_start src/tcp_start.cpp src/tcp_parse.cpp)
+target_link_libraries(tcp_start ${catkin_LIBRARIES})
+
+add_dependencies(tcp_start ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(tcp_start ${PROJECT_NAME}_generate_messages_cpp)
 
 
 #############
