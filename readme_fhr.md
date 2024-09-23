@@ -1,5 +1,6 @@
 ### 2024.9.9
 * 跑通fyj的代码，记得'source devel/setup.bash',修改ip'sudo ifconfig wlp0s20f3 192.168.1.100 netmask 255.255.255.0'
+* 'roslaunch tcp_imu tcp_start.launch'
 * 下一步任务：
 	* 把imu和启动代码分开
 	* 撰写相机的启动代码
@@ -14,4 +15,6 @@
 	* rviz选择pointcloud2，记得地图基准选择livox_frame
 	* 'roslaunch livox_ros_driver2 rviz_MID360.launch'
 * 禾赛雷达安装驱动，但topic为空
-	* 'roslaunch hesai_lidar hesai_lidar.launch lidar_type:="PandarXT-32" frame_id:="PandarXT-32'
+	* 'roslaunch hesai_lidar hesai_lidar.launch lidar_type:="PandarXT-32" frame_id:="PandarXT-32"'
+	* 地图基准为frame_id
+	* 记得查看ip地址（192.168.1.202）和端口
