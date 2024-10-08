@@ -14,6 +14,7 @@
 	* 修改json文件host_net_info的ip为本机ip 192.168.1.100，修改launch文件中雷达sn码为47MDL970020057
 	* rviz选择pointcloud2，记得地图基准选择livox_frame
 	* 'roslaunch livox_ros_driver2 rviz_MID360.launch'
+	* 雷达"ip" : "192.168.1.157",
 * 禾赛雷达安装驱动，但topic为空
 	* 'roslaunch hesai_lidar hesai_lidar.launch lidar_type:="PandarXT-32" frame_id:="PandarXT-32"'
 	* 地图基准为frame_id

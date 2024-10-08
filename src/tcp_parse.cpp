@@ -127,10 +127,26 @@ void imu_refresh(char *data)
     std::ostringstream oss;
     oss << std::put_time(tp_tm, "%H:%M:%S") << "." << std::setw(3) << current_milliseconds;
     std::string time_str = oss.str();
-    std::cout << "Time: " << time_str << std::endl;
+    //std::cout << "Time: " << time_str << std::endl;
 
+    // Get the current system time (to extract current date)
+    auto current_time_point = std::chrono::system_clock::now();
+    auto current_time_t = std::chrono::system_clock::to_time_t(current_time_point);
+    std::tm* current_date = std::localtime(&current_time_t);
+
+    // Now combine the current date with the decoded time (hours, minutes, seconds, milliseconds)
+    std::tm full_time = *current_date;  // Start with current date
+    full_time.tm_hour = tp_tm->tm_hour;  // Set the hour from timer_raw
+    full_time.tm_min = tp_tm->tm_min;    // Set the minute from timer_raw
+    full_time.tm_sec = tp_tm->tm_sec;    // Set the second from timer_raw
+
+    // Convert back to time_point
+    std::time_t combined_time_t = std::mktime(&full_time);
+    ros::Time ros_stamp(combined_time_t, current_milliseconds * 1000000);  // Add milliseconds
+
+    // Set the imu_data header timestamp
     sensor_msgs::Imu imu_data;
-    imu_data.header.stamp = ros::Time::now();
+    imu_data.header.stamp = ros_stamp;
     imu_data.header.frame_id = "imu";
     
     imu_data.linear_acceleration.x = imu[0];
