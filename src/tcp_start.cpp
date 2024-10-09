@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 	// 转换为time_t
     auto now_time_t = std::chrono::system_clock::to_time_t(now);
     // 转换为tm结构
-    auto now_tm = *std::localtime(&now_time_t);
+    auto now_tm = *std::gmtime(&now_time_t);
 
 	auto total_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
     // 计算当前秒的毫秒部分

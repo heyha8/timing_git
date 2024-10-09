@@ -120,29 +120,39 @@ void imu_refresh(char *data)
         imu[i] = *(float*)(data+16+i*4);
     }
 
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::from_time_t(timer_raw / 1000);
-    auto now_time_t = std::chrono::system_clock::to_time_t(now);
-    std::tm* tp_tm = std::gmtime(&now_time_t); 
-    int current_milliseconds = timer_raw % 1000;
+    // 手动从 timer_raw 中提取时、分、秒、毫秒
+    int hours = (timer_raw / (1000 * 60 * 60)) % 24;  // 提取小时数（假设 timer_raw 是一天内的时间）
+    //hours = (hours + 8) % 24;
+    int minutes = (timer_raw / (1000 * 60)) % 60;     // 提取分钟数
+    int seconds = (timer_raw / 1000) % 60;            // 提取秒数
+    int milliseconds = timer_raw % 1000;              // 提取毫秒数
+
+    // 使用 std::ostringstream 将时间格式化为字符串
     std::ostringstream oss;
-    oss << std::put_time(tp_tm, "%H:%M:%S") << "." << std::setw(3) << current_milliseconds;
+    oss << std::setw(2) << std::setfill('0') << hours << ":"
+        << std::setw(2) << std::setfill('0') << minutes << ":"
+        << std::setw(2) << std::setfill('0') << seconds << "."
+        << std::setw(3) << std::setfill('0') << milliseconds;
+
     std::string time_str = oss.str();
     //std::cout << "Time: " << time_str << std::endl;
 
     // Get the current system time (to extract current date)
     auto current_time_point = std::chrono::system_clock::now();
     auto current_time_t = std::chrono::system_clock::to_time_t(current_time_point);
-    std::tm* current_date = std::localtime(&current_time_t);
+    std::tm* current_date = std::gmtime(&current_time_t);
 
     // Now combine the current date with the decoded time (hours, minutes, seconds, milliseconds)
     std::tm full_time = *current_date;  // Start with current date
-    full_time.tm_hour = tp_tm->tm_hour;  // Set the hour from timer_raw
-    full_time.tm_min = tp_tm->tm_min;    // Set the minute from timer_raw
-    full_time.tm_sec = tp_tm->tm_sec;    // Set the second from timer_raw
+    full_time.tm_hour = hours;         // 使用 timer_raw 中的小时数
+    full_time.tm_min = minutes;        // 使用 timer_raw 中的分钟数
+    full_time.tm_sec = seconds;        // 使用 timer_raw 中的秒数
 
     // Convert back to time_point
     std::time_t combined_time_t = std::mktime(&full_time);
-    ros::Time ros_stamp(combined_time_t, current_milliseconds * 1000000);  // Add milliseconds
+    // 加上8小时（28800秒）
+    combined_time_t += 28800;  // 8 hours in seconds
+    ros::Time ros_stamp(combined_time_t, milliseconds * 1000000);  // Add milliseconds
 
     // Set the imu_data header timestamp
     sensor_msgs::Imu imu_data;
