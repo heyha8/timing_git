@@ -1,9 +1,9 @@
 #include "tcp_parse.h"
 #include <tf/tf.h>
 
-ParseUnion    rxdata_union;
-ParseStruct   _parse;
-#define DEG_TO_RAD   (0.01745329)
+ParseUnion rxdata_union;
+ParseStruct _parse;
+#define DEG_TO_RAD (0.01745329)
 
 uint32_t timer_raw;
 uint32_t timer;
@@ -11,7 +11,6 @@ float roll;
 float pitch;
 float yaw;
 float imu[7];
-
 
 /**
  * crc32计算表
@@ -48,21 +47,20 @@ static const uint32_t crc32_tab[] = {
     0xa00ae278, 0xd70dd2ee, 0x4e048354, 0x3903b3c2, 0xa7672661, 0xd06016f7, 0x4969474d, 0x3e6e77db,
     0xaed16a4a, 0xd9d65adc, 0x40df0b66, 0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9,
     0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693, 0x54de5729, 0x23d967bf,
-    0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
-};
+    0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d};
 
 /**
  * crc32计算函数
  */
 uint32_t crc_crc32(uint32_t crc, const uint8_t *buf, uint32_t size)
 {
-    for (uint32_t i=0; i<size; i++) {
+    for (uint32_t i = 0; i < size; i++)
+    {
         crc = crc32_tab[(crc ^ buf[i]) & 0xff] ^ (crc >> 8);
     }
 
     return crc;
 }
-
 
 /**
  * 解码函数
@@ -72,60 +70,53 @@ void data_extraction(void)
     float attitude[3];
     float imu_data[7];
 
-
     /**
      * AHRS帧
      */
-    if(_parse.id==0x02)
+    if (_parse.id == 0x02)
     {
-    sensor_msgs::Imu imu_data;
-    sensor_msgs::MagneticField mag_data;
-    imu_data.header.stamp = ros::Time::now();
-    imu_data.header.frame_id = "imu";
-    
-    imu_data.linear_acceleration.x = rxdata_union.AHRS_DATA_9axis.imu[0];
-    imu_data.linear_acceleration.y = -rxdata_union.AHRS_DATA_9axis.imu[1];
-    imu_data.linear_acceleration.z = -rxdata_union.AHRS_DATA_9axis.imu[2];
+        sensor_msgs::Imu imu_data;
+        sensor_msgs::MagneticField mag_data;
+        imu_data.header.stamp = ros::Time::now();
+        imu_data.header.frame_id = "imu";
 
-    imu_data.angular_velocity.x = rxdata_union.AHRS_DATA_9axis.imu[3]*DEG_TO_RAD;
-    imu_data.angular_velocity.y = -rxdata_union.AHRS_DATA_9axis.imu[4]*DEG_TO_RAD;
-    imu_data.angular_velocity.z = -rxdata_union.AHRS_DATA_9axis.imu[5]*DEG_TO_RAD;
+        imu_data.linear_acceleration.x = rxdata_union.AHRS_DATA_9axis.imu[0];
+        imu_data.linear_acceleration.y = -rxdata_union.AHRS_DATA_9axis.imu[1];
+        imu_data.linear_acceleration.z = -rxdata_union.AHRS_DATA_9axis.imu[2];
 
-    attitude[0] = rxdata_union.AHRS_DATA_9axis.roll;
-    attitude[1] = rxdata_union.AHRS_DATA_9axis.pitch;
-    attitude[2] = rxdata_union.AHRS_DATA_9axis.yaw;
+        imu_data.angular_velocity.x = rxdata_union.AHRS_DATA_9axis.imu[3] * DEG_TO_RAD;
+        imu_data.angular_velocity.y = -rxdata_union.AHRS_DATA_9axis.imu[4] * DEG_TO_RAD;
+        imu_data.angular_velocity.z = -rxdata_union.AHRS_DATA_9axis.imu[5] * DEG_TO_RAD;
 
+        attitude[0] = rxdata_union.AHRS_DATA_9axis.roll;
+        attitude[1] = rxdata_union.AHRS_DATA_9axis.pitch;
+        attitude[2] = rxdata_union.AHRS_DATA_9axis.yaw;
 
-    imu_data.orientation=tf::createQuaternionMsgFromRollPitchYaw(attitude[0]*DEG_TO_RAD,-attitude[1]*DEG_TO_RAD,
-    -attitude[2]*DEG_TO_RAD);
+        imu_data.orientation = tf::createQuaternionMsgFromRollPitchYaw(attitude[0] * DEG_TO_RAD, -attitude[1] * DEG_TO_RAD,
+                                                                       -attitude[2] * DEG_TO_RAD);
 
-
-    IMU_pub.publish(imu_data);
-    std::cout<<"IMU data published"<<std::endl;
-
-
-
+        IMU_pub.publish(imu_data);
+        std::cout << "IMU data published" << std::endl;
     }
-
 }
 
 void imu_refresh(char *data)
 {
-    timer_raw = *(uint32_t*)data;
-    pitch = *(float*)(data+4);
-    roll = *(float*)(data+8);
-    yaw = *(float*)(data+12);
+    timer_raw = *(uint32_t *)data;
+    pitch = *(float *)(data + 4);
+    roll = *(float *)(data + 8);
+    yaw = *(float *)(data + 12);
     for (int i = 0; i < 7; i++)
     {
-        imu[i] = *(float*)(data+16+i*4);
+        imu[i] = *(float *)(data + 16 + i * 4);
     }
 
     // 手动从 timer_raw 中提取时、分、秒、毫秒
-    int hours = (timer_raw / (1000 * 60 * 60)) % 24;  // 提取小时数（假设 timer_raw 是一天内的时间）
-    //hours = (hours + 8) % 24;
-    int minutes = (timer_raw / (1000 * 60)) % 60;     // 提取分钟数
-    int seconds = (timer_raw / 1000) % 60;            // 提取秒数
-    int milliseconds = timer_raw % 1000;              // 提取毫秒数
+    int hours = (timer_raw / (1000 * 60 * 60)) % 24; // 提取小时数（假设 timer_raw 是一天内的时间）
+    // hours = (hours + 8) % 24;
+    int minutes = (timer_raw / (1000 * 60)) % 60; // 提取分钟数
+    int seconds = (timer_raw / 1000) % 60;        // 提取秒数
+    int milliseconds = timer_raw % 1000;          // 提取毫秒数
 
     // 使用 std::ostringstream 将时间格式化为字符串
     std::ostringstream oss;
@@ -135,15 +126,15 @@ void imu_refresh(char *data)
         << std::setw(3) << std::setfill('0') << milliseconds;
 
     std::string time_str = oss.str();
-    //std::cout << "Time: " << time_str << std::endl;
+    // std::cout << "Time: " << time_str << std::endl;
 
     // Get the current system time (to extract current date)
     auto current_time_point = std::chrono::system_clock::now();
     auto current_time_t = std::chrono::system_clock::to_time_t(current_time_point);
-    std::tm* current_date = std::gmtime(&current_time_t);
+    std::tm *current_date = std::gmtime(&current_time_t);
 
     // Now combine the current date with the decoded time (hours, minutes, seconds, milliseconds)
-    std::tm full_time = *current_date;  // Start with current date
+    std::tm full_time = *current_date; // Start with current date
     full_time.tm_hour = hours;         // 使用 timer_raw 中的小时数
     full_time.tm_min = minutes;        // 使用 timer_raw 中的分钟数
     full_time.tm_sec = seconds;        // 使用 timer_raw 中的秒数
@@ -151,25 +142,27 @@ void imu_refresh(char *data)
     // Convert back to time_point
     std::time_t combined_time_t = std::mktime(&full_time);
     // 加上8小时（28800秒）
-    combined_time_t += 28800;  // 8 hours in seconds
-    ros::Time ros_stamp(combined_time_t, milliseconds * 1000000);  // Add milliseconds
+    combined_time_t += 28800;                                     // 8 hours in seconds
+    ros::Time ros_stamp(combined_time_t, milliseconds * 1000000); // Add milliseconds
+
+    std::cout << "IMU stamp = " << ros_stamp.toNSec() << std::endl;
 
     // Set the imu_data header timestamp
     sensor_msgs::Imu imu_data;
     imu_data.header.stamp = ros_stamp;
+    // imu_data.header.stamp = ros::Time::now();   //标定用 2024.10.14 wzf // jcj 不要用系统时间，会产生毫秒级延迟
     imu_data.header.frame_id = "imu";
-    
+
     imu_data.linear_acceleration.x = imu[0];
     imu_data.linear_acceleration.y = imu[1];
     imu_data.linear_acceleration.z = imu[2];
 
-    imu_data.angular_velocity.x = imu[3]*DEG_TO_RAD;
-    imu_data.angular_velocity.y = imu[4]*DEG_TO_RAD;
-    imu_data.angular_velocity.z = imu[5]*DEG_TO_RAD;
+    imu_data.angular_velocity.x = imu[3] * DEG_TO_RAD;
+    imu_data.angular_velocity.y = imu[4] * DEG_TO_RAD;
+    imu_data.angular_velocity.z = imu[5] * DEG_TO_RAD;
 
-    imu_data.orientation=tf::createQuaternionMsgFromRollPitchYaw(roll*DEG_TO_RAD,pitch*DEG_TO_RAD,
-    yaw*DEG_TO_RAD);
-
+    imu_data.orientation = tf::createQuaternionMsgFromRollPitchYaw(roll * DEG_TO_RAD, pitch * DEG_TO_RAD,
+                                                                   yaw * DEG_TO_RAD);
 
     IMU_pub.publish(imu_data);
 }
@@ -177,110 +170,110 @@ void imu_refresh(char *data)
 /**
  * 解码状态机
  */
-void imu_rx(unsigned char data) {
-    static uint32_t crcAccum=1;
-    switch (_parse.state) {
-        case IMU_PARSE_STATE_WAIT_SYNC1:
-            if (data == IMU_PARSE_STATE_SYNC1_ID)
-            {
-                _parse.state = IMU_PARSE_STATE_WAIT_SYNC2;
-                crcAccum=1;
-                crcAccum = crc_crc32(crcAccum,(uint8_t*)&data,1);
-            }
-            std::cout<<"IMU_PARSE_STATE_WAIT_SYNC1"<<std::endl;
-            break;                                             
-        case IMU_PARSE_STATE_WAIT_SYNC2:
-            if (data == IMU_PARSE_STATE_SYNC2_ID)
-            {
-                crcAccum = crc_crc32(crcAccum,(uint8_t*)&data,1);
-                _parse.state = IMU_PARSE_STATE_WAIT_ID1;  
-            }
-            else
-            {
-                _parse.state = IMU_PARSE_STATE_WAIT_SYNC1;    
-            }
-            std::cout<<"IMU_PARSE_STATE_WAIT_SYNC2"<<std::endl;
-            break;
-        case IMU_PARSE_STATE_WAIT_ID1:
-            _parse.id_temp = data;
-            crcAccum = crc_crc32(crcAccum,(uint8_t*)&data,1);
-            _parse.state = IMU_PARSE_STATE_WAIT_ID;
-            std::cout<<"IMU_PARSE_STATE_WAIT_ID1"<<std::endl;
-            break;
+void imu_rx(unsigned char data)
+{
+    static uint32_t crcAccum = 1;
+    switch (_parse.state)
+    {
+    case IMU_PARSE_STATE_WAIT_SYNC1:
+        if (data == IMU_PARSE_STATE_SYNC1_ID)
+        {
+            _parse.state = IMU_PARSE_STATE_WAIT_SYNC2;
+            crcAccum = 1;
+            crcAccum = crc_crc32(crcAccum, (uint8_t *)&data, 1);
+        }
+        std::cout << "IMU_PARSE_STATE_WAIT_SYNC1" << std::endl;
+        break;
+    case IMU_PARSE_STATE_WAIT_SYNC2:
+        if (data == IMU_PARSE_STATE_SYNC2_ID)
+        {
+            crcAccum = crc_crc32(crcAccum, (uint8_t *)&data, 1);
+            _parse.state = IMU_PARSE_STATE_WAIT_ID1;
+        }
+        else
+        {
+            _parse.state = IMU_PARSE_STATE_WAIT_SYNC1;
+        }
+        std::cout << "IMU_PARSE_STATE_WAIT_SYNC2" << std::endl;
+        break;
+    case IMU_PARSE_STATE_WAIT_ID1:
+        _parse.id_temp = data;
+        crcAccum = crc_crc32(crcAccum, (uint8_t *)&data, 1);
+        _parse.state = IMU_PARSE_STATE_WAIT_ID;
+        std::cout << "IMU_PARSE_STATE_WAIT_ID1" << std::endl;
+        break;
 
-        case IMU_PARSE_STATE_WAIT_ID:
-            _parse.id =data<<8 | _parse.id_temp;
-            crcAccum = crc_crc32(crcAccum,(uint8_t*)&data,1);
+    case IMU_PARSE_STATE_WAIT_ID:
+        _parse.id = data << 8 | _parse.id_temp;
+        crcAccum = crc_crc32(crcAccum, (uint8_t *)&data, 1);
 
-            _parse.state = IMU_PARSE_STATE_WAIT_LENGTH1;
-            std::cout<<"IMU_PARSE_STATE_WAIT_ID"<<std::endl;
-            break;
+        _parse.state = IMU_PARSE_STATE_WAIT_LENGTH1;
+        std::cout << "IMU_PARSE_STATE_WAIT_ID" << std::endl;
+        break;
 
-        case IMU_PARSE_STATE_WAIT_LENGTH1:
-            _parse.length_temp = data;
+    case IMU_PARSE_STATE_WAIT_LENGTH1:
+        _parse.length_temp = data;
 
-            crcAccum = crc_crc32(crcAccum,(uint8_t*)&data,1);
-            _parse.state = IMU_PARSE_STATE_WAIT_LENGTH2;
-            std::cout<<"IMU_PARSE_STATE_WAIT_LENGTH1"<<std::endl;
-            break;
+        crcAccum = crc_crc32(crcAccum, (uint8_t *)&data, 1);
+        _parse.state = IMU_PARSE_STATE_WAIT_LENGTH2;
+        std::cout << "IMU_PARSE_STATE_WAIT_LENGTH1" << std::endl;
+        break;
 
+    case IMU_PARSE_STATE_WAIT_LENGTH2:
+        _parse.length = data << 8 | _parse.length_temp;
 
-        case IMU_PARSE_STATE_WAIT_LENGTH2:
-            _parse.length =data<<8 | _parse.length_temp;
+        crcAccum = crc_crc32(crcAccum, (uint8_t *)&data, 1);
+        if (_parse.length > 0 && _parse.length < 10000)
+        {
+            _parse.count = 0;
+            _parse.state = IMU_PARSE_STATE_PAYLOAD;
+        }
+        else
+        {
+            _parse.state = IMU_PARSE_STATE_WAIT_SYNC1;
+        }
+        std::cout << "IMU_PARSE_STATE_WAIT_LENGTH2" << std::endl;
+        break;
 
-            crcAccum = crc_crc32(crcAccum,(uint8_t*)&data,1);
-            if (_parse.length > 0 && _parse.length<10000) {
-                _parse.count = 0;
-                _parse.state = IMU_PARSE_STATE_PAYLOAD;
-            }
-            else
-            {
-                _parse.state = IMU_PARSE_STATE_WAIT_SYNC1;
-            }
-            std::cout<<"IMU_PARSE_STATE_WAIT_LENGTH2"<<std::endl;
-            break;
+    case IMU_PARSE_STATE_PAYLOAD:
+        *((char *)(rxdata_union.payload) + _parse.count) = data;
+        crcAccum = crc_crc32(crcAccum, (uint8_t *)&data, 1);
+        if (++_parse.count == _parse.length)
+            _parse.state = IMU_PARSE_STATE_CHECK1;
+        std::cout << "IMU_PARSE_STATE_PAYLOAD" << std::endl;
+        break;
 
+    case IMU_PARSE_STATE_CHECK1:
 
-        case IMU_PARSE_STATE_PAYLOAD:
-            *((char *)(rxdata_union.payload) + _parse.count) = data;
-            crcAccum = crc_crc32(crcAccum,(uint8_t*)&data,1);
-            if (++_parse.count == _parse.length)
-                _parse.state = IMU_PARSE_STATE_CHECK1; 
-            std::cout<<"IMU_PARSE_STATE_PAYLOAD"<<std::endl;
-            break;
+        _parse.check_temp1 = data;
+        _parse.state = IMU_PARSE_STATE_CHECK2;
+        std::cout << "IMU_PARSE_STATE_CHECK1" << std::endl;
+        break;
 
-        case IMU_PARSE_STATE_CHECK1:
+    case IMU_PARSE_STATE_CHECK2:
+        _parse.check_temp2 = data;
+        _parse.state = IMU_PARSE_STATE_CHECK3;
+        std::cout << "IMU_PARSE_STATE_CHECK2" << std::endl;
+        break;
+    case IMU_PARSE_STATE_CHECK3:
+        _parse.check_temp3 = data;
+        _parse.state = IMU_PARSE_STATE_CHECK4;
+        std::cout << "IMU_PARSE_STATE_CHECK3" << std::endl;
+        break;
+    case IMU_PARSE_STATE_CHECK4:
 
-                _parse.check_temp1 = data;
-                _parse.state = IMU_PARSE_STATE_CHECK2;
-                std::cout<<"IMU_PARSE_STATE_CHECK1"<<std::endl;
-                break;
+        _parse.check = (data << 24) | (_parse.check_temp3 << 16) | (_parse.check_temp2 << 8) | (_parse.check_temp1);
 
-        case IMU_PARSE_STATE_CHECK2:
-                _parse.check_temp2 = data;
-                _parse.state = IMU_PARSE_STATE_CHECK3;
-                std::cout<<"IMU_PARSE_STATE_CHECK2"<<std::endl;
-                break;
-        case IMU_PARSE_STATE_CHECK3:
-                _parse.check_temp3 = data;
-                _parse.state = IMU_PARSE_STATE_CHECK4;
-                std::cout<<"IMU_PARSE_STATE_CHECK3"<<std::endl; 
-                break;
-        case IMU_PARSE_STATE_CHECK4:
+        if (_parse.check == crcAccum)
+        {
+            data_extraction();
+        }
 
-                _parse.check = (data<<24) | (_parse.check_temp3<<16)|(_parse.check_temp2<<8)|(_parse.check_temp1);
+        _parse.state = IMU_PARSE_STATE_WAIT_SYNC1;
+        std::cout << "IMU_PARSE_STATE_CHECK4" << std::endl;
+        break;
 
-                if (_parse.check == crcAccum)
-                {
-                   data_extraction();
-                }
-
-                _parse.state = IMU_PARSE_STATE_WAIT_SYNC1;
-                std::cout<<"IMU_PARSE_STATE_CHECK4"<<std::endl;
-                break;
-
-            default:
-                break;
-      }  
-
+    default:
+        break;
+    }
 }

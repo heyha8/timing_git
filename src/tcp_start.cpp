@@ -8,6 +8,9 @@
 using boost::asio::ip::tcp;
 ros::Publisher IMU_pub;
 
+// 声明 getFormattedTime 函数
+std::string getFormattedTime();
+
 int main(int argc, char **argv)
 {
 	int rev = 0;
@@ -53,9 +56,13 @@ int main(int argc, char **argv)
 	{
 		ROS_INFO_STREAM("Accepted connection from 192.168.1.200");
 
-		std::string message = time_str;
+		// std::string message = time_str;
+		// boost::asio::write(socket, boost::asio::buffer(message));
+		// message = "\'#ss:start************\'";
+		// boost::asio::write(socket, boost::asio::buffer(message));
+		std::string message = "\'#ss:start************\'";
 		boost::asio::write(socket, boost::asio::buffer(message));
-		message = "\'#ss:start************\'";
+		message = time_str;
 		boost::asio::write(socket, boost::asio::buffer(message));
 
         std::atomic<int> imu_flag(0);
@@ -63,7 +70,7 @@ int main(int argc, char **argv)
 		std::thread input_thread([&socket, &imu_flag]() {
 			while (ros::ok()) {
 				int user_input;
-				std::cout << "Enter 1 to start PPS, 2 to stop, 3 to start camera, 4 to stop, 5 to start imu, 6 to stop, 7 to set time: ";
+				std::cout << "Enter 1 to start PPS, 2 to stop, 3 to start camera, 4 to stop, 5 to start imu, 6 to stop, 7 to set time, 8 to getFormattedTime: ";
 				std::cin >> user_input;
 
 				std::string user_message;
@@ -92,6 +99,12 @@ int main(int argc, char **argv)
 						std::getline(std::cin, user_message);  // 读取完整的用户输入消息
 						break;
 					}
+					case 8: {
+						// 重新发送当前系统时间
+						user_message = getFormattedTime();  // 获取格式化的时间并赋值给 user_message
+						std::cout << "System time resent: " << user_message << std::endl;
+						break;
+					}	
 					default:
 						std::cout << "Invalid input. Please enter a valid option (1-7)." << std::endl;
 						continue;
@@ -153,7 +166,7 @@ std::string getFormattedTime() {
     // 创建字符串输出流
     std::ostringstream oss;
     // 格式化时间并插入到字符串中
-    oss << "#st:" << std::put_time(&now_tm, "%y%m%d%H%M%S") << "." 
+    oss << "#st:" << std::put_time(&now_tm, "%d%m%y%H%M%S") << "." 
         << std::setw(2) << std::setfill('0') << current_milliseconds_tens_and_hundreds << "**";
     
     // 返回格式化后的时间字符串
