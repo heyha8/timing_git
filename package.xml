@@ -67,6 +67,9 @@
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>turtlesim</exec_depend>
 
+  <depend>image_transport</depend>
+  <depend>sensor_msgs</depend>
+
 
   <url>http://ros.org/wiki/sensor_mags</url>
 

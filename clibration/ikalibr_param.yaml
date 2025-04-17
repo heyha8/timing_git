@@ -1,0 +1,122 @@
+CalibParam:
+  Header:
+    Software: iKalibr
+    Version: 2.0.0
+    Address: https://github.com/Unsigned-Long/iKalibr.git
+  EXTRI:
+    SO3_BiToBr:
+      - key: /imu
+        value:
+          qx: 0
+          qy: 0
+          qz: 0
+          qw: 1
+    POS_BiInBr:
+      - key: /imu
+        value:
+          r0c0: 0
+          r1c0: 0
+          r2c0: 0
+    SO3_RjToBr:
+      []
+    POS_RjInBr:
+      []
+    SO3_LkToBr:
+      - key: /hesai/pandar
+        value:
+          qx: -0.0115494377572271
+          qy: -0.8612894823738078
+          qz: 0.50785859686529
+          qw: -0.01125538225770515
+      - key: /livox/lidar
+        value:
+          qx: -0.001959916542997731
+          qy: -0.0183504131532268
+          qz: -0.9998014967133597
+          qw: 0.00750920994357774
+    POS_LkInBr:
+      - key: /hesai/pandar
+        value:
+          r0c0: -0.05342769407014442
+          r1c0: -0.003737439090847478
+          r2c0: -0.04069358660072635
+      - key: /livox/lidar
+        value:
+          r0c0: -0.0539114707266129
+          r1c0: -0.002573553335441055
+          r2c0: 0.1260177940561691
+    SO3_CmToBr:
+      []
+    POS_CmInBr:
+      []
+    SO3_DnToBr:
+      []
+    POS_DnInBr:
+      []
+    SO3_EsToBr:
+      []
+    POS_EsInBr:
+      []
+  TEMPORAL:
+    TO_BiToBr:
+      - key: /imu
+        value: 0
+    TO_RjToBr:
+      []
+    TO_LkToBr:
+      - key: /hesai/pandar
+        value: 0.01346945796409362
+      - key: /livox/lidar
+        value: -0.1
+    TO_CmToBr:
+      []
+    TO_DnToBr:
+      []
+    TO_EsToBr:
+      []
+    RS_READOUT:
+      []
+  INTRI:
+    IMU:
+      - key: /imu
+        value:
+          ptr_wrapper:
+            id: 2147483649
+            data:
+              ACCE:
+                BIAS:
+                  r0c0: 0.06055131132036586
+                  r1c0: -0.2029574456741211
+                  r2c0: 0.01231737685067115
+                MAP_COEFF:
+                  r0c0: 1
+                  r1c0: 1
+                  r2c0: 1
+                  r3c0: 0
+                  r4c0: 0
+                  r5c0: 0
+              GYRO:
+                BIAS:
+                  r0c0: -0.001787233862768126
+                  r1c0: 0.005260873601823305
+                  r2c0: -0.001396579883345701
+                MAP_COEFF:
+                  r0c0: 1
+                  r1c0: 1
+                  r2c0: 1
+                  r3c0: 0
+                  r4c0: 0
+                  r5c0: 0
+              SO3_AtoG:
+                qx: 0
+                qy: 0
+                qz: 0
+                qw: 1
+    Camera:
+      []
+    RGBD:
+      []
+  GRAVITY:
+    r0c0: -4.545192347493732e-15
+    r1c0: 1.990974659443756e-15
+    r2c0: -9.800000000000006

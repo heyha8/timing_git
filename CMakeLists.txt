@@ -15,6 +15,9 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   turtlesim
   message_generation
+  image_transport 
+  sensor_msgs
+  cv_bridge
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -177,6 +180,11 @@ target_link_libraries(tcp_start ${catkin_LIBRARIES})
 
 add_dependencies(tcp_start ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(tcp_start ${PROJECT_NAME}_generate_messages_cpp)
+
+add_executable(compressed_to_image_converter src/compressed_to_image_converter.cpp)
+target_link_libraries(compressed_to_image_converter ${catkin_LIBRARIES})
+add_dependencies(compressed_to_image_converter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(compressed_to_image_converter ${PROJECT_NAME}_generate_messages_cpp)
 
 
 #############
