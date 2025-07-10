@@ -27,13 +27,13 @@ def merge_rosbags(input_bag_files, output_bag_file, topics_to_extract):
 
 if __name__ == "__main__":
     # 输入的 rosbag 文件路径列表
-    input_bag_files = ['/media/fhr/Elements/dataset/handle_mapping/25-4-17-indoor/6_sorted/2025-04-17-17-46-13.bag', '/media/fhr/Elements/dataset/handle_mapping/25-4-17-indoor/6_sorted/camera2.bag']
+    input_bag_files = ['/media/fhr/Elements/dataset/handle_mapping/25-07-09-9舍地下车库/2025-07-10-01-19-01.bag', '/media/fhr/Elements/dataset/handle_mapping/25-07-09-9舍地下车库/cam2.bag']
     
     # 指定要提取的 topic 列表
-    topics_to_extract = ['/camera1/image/compressed', '/hesai/pandar','/imu']
+    topics_to_extract = ['/camera1/image/compressed','/imu','/hesai/pandar']
 
     # 输出的合成后的 rosbag 文件路径
-    output_bag_file = '/media/fhr/Elements/dataset/handle_mapping/25-4-17-indoor/6_sorted/hesai-camera2.bag'
+    output_bag_file = '/media/fhr/Elements/dataset/handle_mapping/25-07-09-9舍地下车库/hesai-cam2.bag'
 
     # 合并多个 rosbag 文件
     merge_rosbags(input_bag_files, output_bag_file, topics_to_extract)

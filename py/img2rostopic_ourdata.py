@@ -91,8 +91,8 @@ def images_to_rosbag(image_folder, output_bag_path, topic_name="/camera/image_ra
 
 if __name__ == "__main__":
     # 示例用法
-    image_folder = "/media/fhr/Elements/dataset/handle_mapping/25-4-17-indoor/6_sorted/camera_2"  # 替换为实际图像文件夹路径
-    output_bag = "/media/fhr/Elements/dataset/handle_mapping/25-4-17-indoor/6_sorted/camera2.bag"  # 输出rosbag文件名
+    image_folder = "/media/fhr/Elements/dataset/handle_mapping/25-07-09-9舍地下车库/cam/image/camera_2"  # 替换为实际图像文件夹路径
+    output_bag = "/media/fhr/Elements/dataset/handle_mapping/25-07-09-9舍地下车库/cam2.bag"  # 输出rosbag文件名
     topic_name = "/camera1/image/compressed"  # ROS压缩话题名称
     
     # 初始化ROS节点（仅用于获取rospy.Time）
@@ -101,8 +101,8 @@ if __name__ == "__main__":
     # 配置参数
     resize_factor = 1  # 图像缩放比例
     add_8hours = True    # 是否加上8小时
-    discard_after_timestamp = 1744883260.92  # 舍弃此时间戳之后的数据，None表示不启用
-    discard_before_timestamp = 1744883173.88  # 舍弃此时间戳之前的数据，None表示不启用
+    discard_after_timestamp = 1752081820.37  # 舍弃此时间戳之后的数据，None表示不启用
+    discard_before_timestamp = 1752081541.96  # 舍弃此时间戳之前的数据，None表示不启用
     
     images_to_rosbag(image_folder, output_bag, topic_name, 
                     resize_factor=resize_factor, 

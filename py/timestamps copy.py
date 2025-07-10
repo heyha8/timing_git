@@ -5,10 +5,10 @@ import os
 import pickle
 
 # 设置文件路径
-bag_path = '/media/fhr/Elements/dataset/handle_mapping/oxford/keble-collage-3/1710256011_2024-03-12-15-06-52_0(1).bag'
-output_txt = 'timestamps_comparison_oxford.txt'
-timestamp_cache = 'timestamps_cache.pkl'
-corrected_cam_timestamps_txt = 'corrected_cam_timestamps.txt'
+bag_path = '/media/fhr/Elements/dataset/handle_mapping/25-4-17-indoor/6_sorted/all-camera2.bag'
+output_txt = 'timestamps_comparison_6.txt'
+timestamp_cache = 'timestamps_cache_6.pkl'
+#corrected_cam_timestamps_txt = 'corrected_cam_timestamps.txt'
 
 # 检查是否已有缓存的时间戳文件
 def load_cached_timestamps():
@@ -31,15 +31,15 @@ def extract_timestamps_from_bag():
     cam_timestamps = []
     print("Reading rosbag...")
     for topic, msg, t in bag.read_messages(topics=[
-        '/alphasense_driver_ros/imu',
-        '/hesai/pandar',
-        '/alphasense_driver_ros/cam1/debayered/image/compressed'
+        '/imu',
+        '/livox/lidar',
+        '/camera1/image/compressed'
     ]):
-        if topic == '/alphasense_driver_ros/imu':
+        if topic == '/imu':
             imu_timestamps.append(t.to_sec())
-        elif topic == '/hesai/pandar':
+        elif topic == '/livox/lidar':
             lidar_timestamps.append(t.to_sec())
-        elif topic == '/alphasense_driver_ros/cam1/debayered/image/compressed':
+        elif topic == '/camera1/image/compressed':
             cam_timestamps.append(t.to_sec())
     bag.close()
     return imu_timestamps, lidar_timestamps, cam_timestamps
@@ -201,44 +201,44 @@ else:
 
 print(f"Timestamp comparison has been saved to {output_txt}")
 
-# 修正相机时间戳
-corrected_cam_timestamps = []
-cam_idx = 0
-error_idx = 0
+# # 修正相机时间戳
+# corrected_cam_timestamps = []
+# cam_idx = 0
+# error_idx = 0
 
-for cam_time in cam_timestamps:
-    if cam_idx < len(cam_timestamps):
-        # 检查是否有对应的误差
-        if error_idx < len(cam_lidar_errors) and abs(cam_time - aligned_cam_timestamps[error_idx]) < 0.01:
-            # 使用误差修正时间戳
-            corrected_time = cam_time + cam_lidar_errors[error_idx]
-            corrected_cam_timestamps.append(corrected_time)
-            error_idx += 1
-        else:
-            # 没有对应误差，使用前后帧插值
-            if error_idx == 0:
-                # 在第一个误差之前，使用第一个误差
-                corrected_time = cam_time + cam_lidar_errors[0]
-            elif error_idx >= len(cam_lidar_errors):
-                # 在最后一个误差之后，使用最后一个误差
-                corrected_time = cam_time + cam_lidar_errors[-1]
-            else:
-                # 在两个误差之间，线性插值
-                t1 = aligned_cam_timestamps[error_idx - 1]
-                t2 = aligned_cam_timestamps[error_idx]
-                e1 = cam_lidar_errors[error_idx - 1]
-                e2 = cam_lidar_errors[error_idx]
-                weight = (cam_time - t1) / (t2 - t1)
-                interpolated_error = e1 + weight * (e2 - e1)
-                corrected_time = cam_time + interpolated_error
-            corrected_cam_timestamps.append(corrected_time)
-        cam_idx += 1
+# for cam_time in cam_timestamps:
+#     if cam_idx < len(cam_timestamps):
+#         # 检查是否有对应的误差
+#         if error_idx < len(cam_lidar_errors) and abs(cam_time - aligned_cam_timestamps[error_idx]) < 0.01:
+#             # 使用误差修正时间戳
+#             corrected_time = cam_time + cam_lidar_errors[error_idx]
+#             corrected_cam_timestamps.append(corrected_time)
+#             error_idx += 1
+#         else:
+#             # 没有对应误差，使用前后帧插值
+#             if error_idx == 0:
+#                 # 在第一个误差之前，使用第一个误差
+#                 corrected_time = cam_time + cam_lidar_errors[0]
+#             elif error_idx >= len(cam_lidar_errors):
+#                 # 在最后一个误差之后，使用最后一个误差
+#                 corrected_time = cam_time + cam_lidar_errors[-1]
+#             else:
+#                 # 在两个误差之间，线性插值
+#                 t1 = aligned_cam_timestamps[error_idx - 1]
+#                 t2 = aligned_cam_timestamps[error_idx]
+#                 e1 = cam_lidar_errors[error_idx - 1]
+#                 e2 = cam_lidar_errors[error_idx]
+#                 weight = (cam_time - t1) / (t2 - t1)
+#                 interpolated_error = e1 + weight * (e2 - e1)
+#                 corrected_time = cam_time + interpolated_error
+#             corrected_cam_timestamps.append(corrected_time)
+#         cam_idx += 1
 
-# 将修正后的相机时间戳保存到 TXT 文件
-with open(corrected_cam_timestamps_txt, 'w') as f:
-    f.write("Corrected Camera Timestamps\n")
-    f.write("=" * 50 + "\n")
-    for t in corrected_cam_timestamps:
-        f.write("{:.6f}\n".format(t))
+# # 将修正后的相机时间戳保存到 TXT 文件
+# with open(corrected_cam_timestamps_txt, 'w') as f:
+#     f.write("Corrected Camera Timestamps\n")
+#     f.write("=" * 50 + "\n")
+#     for t in corrected_cam_timestamps:
+#         f.write("{:.6f}\n".format(t))
 
-print(f"Corrected camera timestamps saved to {corrected_cam_timestamps_txt}")
+#print(f"Corrected camera timestamps saved to {corrected_cam_timestamps_txt}")

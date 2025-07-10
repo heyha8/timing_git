@@ -7,10 +7,12 @@ Intrinsics:
     id: 2147483649
     data:
       img_width: 3840
-      img_height: 2160  # fx, fy
+      img_height: 2160  
+      # fx, fy
       focal_length:
         - 1125.16085819621
-        - 1124.665267785501  # cx, cy
+        - 1124.665267785501  
+      # cx, cy
       principal_point:
         - 1880.438461004703
         - 1107.358701831895

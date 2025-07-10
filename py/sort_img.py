@@ -28,8 +28,8 @@ target folder structure:
 """
 
 
-src_folder = '/media/fhr/Elements/dataset/handle_mapping/25-4-17-indoor/6'
-dest_folder = '/media/fhr/Elements/dataset/handle_mapping/25-4-17-indoor/6_sorted'
+src_folder = '/media/fhr/Elements/dataset/handle_mapping/25-07-09-9舍地下车库/cam/1'
+dest_folder = '/media/fhr/Elements/dataset/handle_mapping/25-07-09-9舍地下车库/cam/image'
 camera_num = 4
 
 if __name__ == '__main__':

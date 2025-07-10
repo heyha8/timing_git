@@ -1,21 +1,25 @@
 import numpy as np
 
-def quaternion_to_rotation_matrix(qx, qy, qz, qw):
-    """Convert quaternion to 3x3 rotation matrix"""
+def quaternion_and_translation_to_transform(qx, qy, qz, qw, t):
+    """Convert quaternion and translation to 4x4 transformation matrix"""
     q = np.array([qw, qx, qy, qz])
     q = q / np.linalg.norm(q)  # Normalize quaternion
     qw, qx, qy, qz = q
-    return np.array([
+    R = np.array([
         [1 - 2*qy**2 - 2*qz**2, 2*qx*qy - 2*qz*qw, 2*qx*qz + 2*qy*qw],
         [2*qx*qy + 2*qz*qw, 1 - 2*qx**2 - 2*qz**2, 2*qy*qz - 2*qx*qw],
         [2*qx*qz - 2*qy*qw, 2*qy*qz + 2*qx*qw, 1 - 2*qx**2 - 2*qy**2]
     ])
+    T = np.eye(4)
+    T[:3, :3] = R
+    T[:3, 3] = t
+    return T
 
-def compute_lidar_to_camera_transform(R_ci, P_ci, R_il, P_li):
-    """Compute transformation from LiDAR to camera"""
-    R_li = R_il.T  # Inverse of R_il (from IMU to LiDAR)
-    R_cl = R_ci @ R_il
-    P_cl = P_ci - R_cl @ P_li
+def compute_lidar_to_camera_transform(T_ci, T_il):
+    """Compute transformation from LiDAR to camera using transformation matrices"""
+    T_cl = T_ci @ T_il
+    R_cl = T_cl[:3, :3]
+    P_cl = T_cl[:3, 3]
     return R_cl, P_cl
 
 # Camera configurations (IMU to Camera)
@@ -28,11 +32,11 @@ camera_configs = {
         'P': np.array([0.0002384815967839808, -0.07021666474267334, -0.06198398020359156])
     },
     '/camera2/image_raw': {
-        'qx': 0.77504873,
-        'qy': -0.01674809,
-        'qz': -0.62674843,
-        'qw': 0.07877421,
-        'P': np.array([0.06871699,  0.00360836, -0.06794977]) # 0.08871699,  0.00360836, -0.06794977
+        'qx': 0.7041876709956439,
+        'qy': 0.003554908799898653,
+        'qz': -0.7099931820693703,
+        'qw': 0.004094881703420828,
+        'P': np.array([-0.04274680538157673, 0.002678105323233039,-0.02867295405798999])
     },
     '/camera3/image_raw': {
         'qx': -0.5128203538420552,
@@ -70,21 +74,25 @@ lidar_configs = {
 
 # Compute and output transformations
 for lidar_key, lidar_config in lidar_configs.items():
-    R_li = quaternion_to_rotation_matrix(lidar_config['qx'], lidar_config['qy'], lidar_config['qz'], lidar_config['qw'])
-    P_li = lidar_config['P']
-
-    R_il = R_li.T  # 旋转矩阵取转置
-    P_il = -R_il @ P_li  # 平移向量取负
+    T_li = quaternion_and_translation_to_transform(
+        lidar_config['qx'], lidar_config['qy'], lidar_config['qz'], lidar_config['qw'], lidar_config['P']
+    )
+    
+    # Compute inverse transformation (IMU to LiDAR)
+    T_il = np.linalg.inv(T_li)
+    R_il = T_il[:3, :3]
+    P_il = T_il[:3, 3]
     
     print(f"\n{lidar_key} to IMU:")
     print("extrinsic_R:", R_il.flatten().tolist())
     print("extrinsic_T:", P_il.tolist())
     
     for camera_key, camera_config in camera_configs.items():
-        R_ci = quaternion_to_rotation_matrix(camera_config['qx'], camera_config['qy'], camera_config['qz'], camera_config['qw'])
-        P_ci = camera_config['P']
+        T_ci = quaternion_and_translation_to_transform(
+            camera_config['qx'], camera_config['qy'], camera_config['qz'], camera_config['qw'], camera_config['P']
+        )
         
-        R_cl, P_cl = compute_lidar_to_camera_transform(R_ci, P_ci, R_il, P_li)
+        R_cl, P_cl = compute_lidar_to_camera_transform(T_ci, T_il)
         
         print(f"\n{lidar_key} to {camera_key}:")
         print("Rcl:", R_cl.flatten().tolist())
